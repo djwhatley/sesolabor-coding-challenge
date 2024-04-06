@@ -5,10 +5,10 @@ Instead, I figured that a min heap would be a good data structure to use here. S
 
 * Populate the heap initially with each log source, and its first message.
 * While the heap is not empty, we:
-    1. Take a source from the head of heap.
-    2. Print the stored log message.
-    3. Try to get the next message for that source.
-    4. If there is a message, put that source back on the heap with that message. 
+    * Take a source from the head of heap.
+    * Print the stored log message.
+    * Try to get the next message for that source.
+    * If there is a message, put that source back on the heap with that message. 
 * Once the heap is empty, we're done.
 
 ## On Performance
