@@ -26,29 +26,34 @@ module.exports = (logSources, printer) => {
         });
       }
     }).then(() => {
-      // Then this janky setup to repeatedly look for the next log without blocking.
+      // Then this setInterval construction to repeatedly look for the next log without blocking.
       // I think this could possibly be avoided using async/await pattern rather than bare Promises.
-      (function pollForLog() {
-        setTimeout(() => {
-          if (heap.size == 0) {
-            printer.done();
-            resolve(console.log("Async sort complete."));
-          } else {
-            // Print lines until we run out of sources; when a source is drained, we don't reinsert to the heap.
-            const next = heap.removeHead();
-            const log = next.nextLog;
-            printer.print(log);
-            
-            // Get next log from the source; if one exists, reinsert source to the heap.
-            next.source.popAsync().then((nextLog) => {
-              if (!!nextLog) {
-                heap.insert({source: next.source, nextLog: nextLog})
-              }
-              pollForLog();
-            });
-          }
-        }, 0);
-      })();
+      let sourcesWithLogsRemaining = heap.size;
+      let ready = true;
+      const handle = setInterval(() => {
+        if (sourcesWithLogsRemaining == 0) {
+          printer.done();
+          clearInterval(handle);
+          resolve(console.log("Async sort complete."));
+        } else if (ready && heap.size > 0) {
+          // Print lines until we run out of sources; when a source is drained, we don't reinsert to the heap.
+          const next = heap.removeHead();
+          const log = next.nextLog;
+          printer.print(log);
+
+          // We have to wait for the next log from this source, to know if it is or is not immediately the next one.
+          ready = false;          
+          // Get next log from the source; if one exists, reinsert source to the heap.
+          next.source.popAsync().then((nextLog) => {
+            if (!!nextLog) {
+              heap.insert({source: next.source, nextLog: nextLog});
+            } else {
+              sourcesWithLogsRemaining--;
+            }
+            ready = true;
+          });
+        }
+      }, 0);
 
     });
   });
