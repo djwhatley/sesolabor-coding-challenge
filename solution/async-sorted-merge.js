@@ -11,7 +11,6 @@ module.exports = (logSources, printer) => {
     return l.nextLog.date - r.nextLog.date;
   });
   return new Promise((resolve, reject) => {
-    
     // First insert every source into the heap.
     new Promise((res, rej) => {
       let sourcesPopulated = 0;
