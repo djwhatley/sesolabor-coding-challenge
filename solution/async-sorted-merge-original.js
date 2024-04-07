@@ -4,6 +4,8 @@ const MinHeap = require('min-heap');
 
 // Print all entries, across all of the *async* sources, in chronological order.
 
+// Improved solution using event emitter
+
 module.exports = (logSources, printer) => {
   return new Promise((resolve, reject) => {
     // Use a min heap to keep log sources sorted by date of the next log line to be printed.
